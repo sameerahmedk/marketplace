@@ -4,7 +4,7 @@ const retailerSchema = new mongoose.Schema({
   user_id: {
     type: String,
     required: true,
-    unique: true
+    ref: 'User.user_id'
   },
   address: {
     type: String,
