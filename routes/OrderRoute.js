@@ -4,6 +4,8 @@ const {
 	verifyAccessToken,
 } = require('../helpers/jwtHelper');
 const Order = require('../models/order');
+const Retailer = require('../models/retailer');
+const user = require('../models/user');
 
 // Place order
 router.post(
@@ -20,13 +22,19 @@ router.post(
 	}
 );
 
-// Get all orders
+// Get all orders by the logged in user
 router.get(
 	'/',
 	verifyAccessToken,
 	async (req, res) => {
 		try {
-			const orders = await Order.find();
+			user_id = req.user.user_id;
+			const orders = await Order.find({
+				$or: [
+					{ supplier_id: user_id },
+					{ retailer_id: user_id },
+				],
+			});
 			res.json(orders);
 		} catch (err) {
 			next(err);
