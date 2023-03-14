@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const Retailer = require('../models/retailer');
+const Retailer = require("../models/retailer");
 
 // Create a new retailer
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const retailer = new Retailer(req.body);
     await retailer.save();
@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get all retailers
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const retailers = await Retailer.find();
     res.json(retailers);
@@ -25,12 +25,12 @@ router.get('/', async (req, res) => {
 });
 
 // Get a single retailer
-router.get('/:id', getRetailer, (req, res) => {
+router.get("/:id", getRetailer, (req, res) => {
   res.json(res.retailer);
 });
 
 // Update a retailer
-router.patch('/:id', getRetailer, async (req, res) => {
+router.patch("/:id", getRetailer, async (req, res) => {
   if (req.body.User_ID != null) {
     res.retailer.User_ID = req.body.User_ID;
   }
@@ -55,10 +55,10 @@ router.patch('/:id', getRetailer, async (req, res) => {
 });
 
 // Delete a retailer
-router.delete('/:id', getRetailer, async (req, res) => {
+router.delete("/:id", getRetailer, async (req, res) => {
   try {
     await res.retailer.remove();
-    res.json({ message: 'Retailer deleted' });
+    res.json({ message: "Retailer deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -70,7 +70,9 @@ async function getRetailer(req, res, next) {
   try {
     retailer = await Retailer.findById(req.params.id);
     if (retailer == null) {
-      return res.status(404).json({ message: 'Cannot find retailer' });
+      return res.status(404).json({
+        message: "Cannot find retailer",
+      });
     }
   } catch (err) {
     return res.status(500).json({ message: err.message });

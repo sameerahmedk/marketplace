@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const {verifyAccessToken} = require('../helpers/jwtHelper')
-const Product = require('../models/product');
+const { verifyAccessToken } = require("../helpers/jwtHelper");
+const Product = require("../models/product");
 
 // Create a product
-router.post('/', verifyAccessToken, async (req, res) => {
+router.post("/", verifyAccessToken, async (req, res) => {
   try {
     const product = new Product(req.body);
     await product.save();
@@ -15,7 +15,7 @@ router.post('/', verifyAccessToken, async (req, res) => {
 });
 
 // Get all products
-router.get('/', verifyAccessToken, async (req, res) => {
+router.get("/", verifyAccessToken, async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
@@ -25,12 +25,12 @@ router.get('/', verifyAccessToken, async (req, res) => {
 });
 
 // Get a single product
-router.get('/:id', verifyAccessToken, getProduct, (req, res) => {
+router.get("/:id", verifyAccessToken, getProduct, (req, res) => {
   res.json(res.product);
 });
 
 // Update a product
-router.patch('/:id', verifyAccessToken, getProduct, async (req, res) => {
+router.patch("/:id", verifyAccessToken, getProduct, async (req, res) => {
   if (req.body.productId != null) {
     res.product.productId = req.body.productId;
   }
@@ -67,10 +67,10 @@ router.patch('/:id', verifyAccessToken, getProduct, async (req, res) => {
 });
 
 // Delete a product
-router.delete('/:id', verifyAccessToken, getProduct, async (req, res) => {
+router.delete("/:id", verifyAccessToken, getProduct, async (req, res) => {
   try {
     await res.product.remove();
-    res.json({ message: 'Product deleted' });
+    res.json({ message: "Product deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -82,7 +82,7 @@ async function getProduct(req, res, next) {
   try {
     product = await Product.findById(req.params.id);
     if (product == null) {
-      return res.status(404).json({ message: 'Cannot find product' });
+      return res.status(404).json({ message: "Cannot find product" });
     }
   } catch (err) {
     return res.status(500).json({ message: err.message });

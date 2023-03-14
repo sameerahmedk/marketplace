@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const Supplier = require('../models/supplier');
+const Supplier = require("../models/supplier");
 
 // Create a new supplier
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const supplier = new Supplier(req.body);
     await supplier.save();
@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get all suppliers
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     //console.log("ABBASI")
     const suppliers = await Supplier.find();
@@ -26,12 +26,12 @@ router.get('/', async (req, res) => {
 });
 
 // Get a single supplier
-router.get('/:id', getSupplier, (req, res) => {
+router.get("/:id", getSupplier, (req, res) => {
   res.json(res.supplier);
 });
 
 // Update a supplier
-router.patch('/:id', getSupplier, async (req, res) => {
+router.patch("/:id", getSupplier, async (req, res) => {
   if (req.body.User_ID != null) {
     res.supplier.User_ID = req.body.User_ID;
   }
@@ -59,10 +59,10 @@ router.patch('/:id', getSupplier, async (req, res) => {
 });
 
 // Delete a supplier
-router.delete('/:id', getSupplier, async (req, res) => {
+router.delete("/:id", getSupplier, async (req, res) => {
   try {
     await res.supplier.remove();
-    res.json({ message: 'Supplier deleted' });
+    res.json({ message: "Supplier deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -74,7 +74,7 @@ async function getSupplier(req, res, next) {
   try {
     supplier = await Supplier.findById(req.params.id);
     if (supplier == null) {
-      return res.status(404).json({ message: 'Cannot find supplier' });
+      return res.status(404).json({ message: "Cannot find supplier" });
     }
   } catch (err) {
     return res.status(500).json({ message: err.message });
