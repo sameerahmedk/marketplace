@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type:mongoose.Schema.Types.String,
+    ref:"Role.role_name",
+    required: true,
+  },
   contact_number: { type: String, required: true },
 });
 
