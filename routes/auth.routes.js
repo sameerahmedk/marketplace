@@ -1,3 +1,6 @@
+//import { serialize  } from "cookie";
+//const cookie = require("cookie");
+//const serialize =cookie.serialize;
 const express = require("express");
 const router = express.Router();
 const createError = require("http-errors");
@@ -24,6 +27,7 @@ router.post("/register", async (req, res, next) => {
     const accessToken = await signAccessToken(savedUser.id);
     const refreshToken = await signRefreshToken(savedUser.id);
     res.send({ accessToken, refreshToken });
+
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
     next(error);
@@ -46,10 +50,28 @@ router.post("/login", async (req, res, next) => {
 
     const accessToken = await signAccessToken(user.id);
     const refreshToken = await signRefreshToken(user.id);
+    res.cookie("refreshToken", refreshToken,  {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+    // const serialised= serialize("OurSiteJWT",res.data,{
+    //   maxAge: 60 * 60 * 24 * 7, // 1 week
+    //   path: "/",
+    //   httpOnly: true,
+    //   sameSite: "strict",
+    //   secure: true,
+    // });
+    res.setHeader("Set-Cookie",res.cookie("refreshToken", refreshToken,  {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    }));
+    await res.send({ accessToken, refreshToken });
 
-    res.send({ accessToken, refreshToken });
-
-    res.send(result);
+    await res.send(result);
   } catch (error) {
     if (error.isJoi === true)
       return next(createError.BadRequest("Invalid Username/Password"));

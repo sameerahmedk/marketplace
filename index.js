@@ -17,7 +17,7 @@ const url3 = "mongodb://127.0.0.1/Web_Project";
 const app = express();
 const cors = require('cors');
 const corsOptions ={
-    origin:'http://localhost:3001', 
+    origin:'http://localhost:3000', 
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
