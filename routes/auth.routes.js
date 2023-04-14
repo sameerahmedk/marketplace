@@ -1,6 +1,4 @@
-//import { serialize  } from "cookie";
-//const cookie = require("cookie");
-//const serialize =cookie.serialize;
+const cookie = require("cookie");
 const express = require("express");
 const router = express.Router();
 const createError = require("http-errors");
@@ -50,25 +48,7 @@ router.post("/login", async (req, res, next) => {
 
     const accessToken = await signAccessToken(user.id);
     const refreshToken = await signRefreshToken(user.id);
-    res.cookie("refreshToken", refreshToken,  {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    });
-    // const serialised= serialize("OurSiteJWT",res.data,{
-    //   maxAge: 60 * 60 * 24 * 7, // 1 week
-    //   path: "/",
-    //   httpOnly: true,
-    //   sameSite: "strict",
-    //   secure: true,
-    // });
-    res.setHeader("Set-Cookie",res.cookie("refreshToken", refreshToken,  {
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
-      secure: true,
-    }));
+
     await res.send({ accessToken, refreshToken });
 
     await res.send(result);
@@ -85,7 +65,7 @@ router.post("/refresh-token", async (req, res, next) => {
     if (!refreshToken) throw createError.BadRequest();
     const userId = await verifyRefreshToken(refreshToken);
 
-    const accessToken = await signAccessToken(userId);
+    const accessToken = await signAccessToken(userId);  
     const refToken = await signRefreshToken(userId);
     res.send({
       accessToken: accessToken,
