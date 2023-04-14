@@ -28,7 +28,7 @@ router.get(
 	verifyAccessToken,
 	async (req, res) => {
 		try {
-			user_id = req.user.user_id;
+			const user_id = req.user.user_id;
 			const orders = await Order.find({
 				$or: [
 					{ supplier_id: user_id },
