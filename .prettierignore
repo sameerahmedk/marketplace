@@ -1,0 +1,4 @@
+types/graphql.ts
+node_modules
+.next
+.github
