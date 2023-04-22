@@ -4,7 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "prettier-watch": "onchange \"**/*\" -- prettier --write --ignore-unknown {{changed}}",
+    "prepare": "husky install"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "author": "",
   "license": "ISC",
@@ -22,5 +29,13 @@
     "mongoose": "^6.10.3",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.20"
+  },
+  "devDependencies": {
+    "@pnpm/eslint-config": "^1.0.1",
+    "eslint": "^8.39.0",
+    "eslint-config-prettier": "^8.8.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.1",
+    "prettier": "2.8.7"
   }
 }
