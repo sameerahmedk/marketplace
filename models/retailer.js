@@ -1,30 +1,30 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const retailerSchema = new mongoose.Schema({
   user_id: {
     type: String,
     required: true,
-    ref: "User.user_id",
+    ref: 'User.user_id'
   },
   address: {
     type: String,
-    required: true,
+    required: true
   },
   city: {
     type: String,
-    required: true,
+    required: true
   },
   country: {
     type: String,
-    required: true,
+    required: true
   },
   nic: {
     type: String,
     required: true,
-    unique: true,
-  },
-});
+    unique: true
+  }
+})
 
-const Retailer = mongoose.model("Retailer", retailerSchema);
+const Retailer = mongoose.model('Retailer', retailerSchema)
 
-module.exports = Retailer;
+module.exports = Retailer
