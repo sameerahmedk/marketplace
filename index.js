@@ -7,8 +7,6 @@ const ProductRoute = require('./routes/ProductRoute')
 const bodyParser = require('body-parser')
 const authRouter = require('./routes/auth.routes')
 
-const url3 = process.env.MONGO_URI
-
 const app = express()
 const cors = require('cors')
 const corsOptions = {
@@ -23,16 +21,6 @@ app.use('/auth', authRouter)
 app.use('/supplier', SupplierRoute)
 app.use('/retailer', RetailerRoute)
 app.use('/product', ProductRoute)
-
-mongoose.connect(url3, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-const con = mongoose.connection
-
-con.on('open', function () {
-  console.log('connected...')
-})
 
 const { MONGO_URI } = process.env
 
