@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require('joi')
 
 const authSchema = Joi.object({
   name: Joi.string().required(),
@@ -6,16 +6,16 @@ const authSchema = Joi.object({
   //pwd must be ('^[a-zA-Z0-9]{3,30}$')
   password: Joi.string().min(8).required(),
   contact_number: Joi.string().required(),
-  role: Joi.string().required().valid("supplier", "retailer")
-});
+  role: Joi.string().required().valid('supplier', 'retailer')
+})
 
 const loginSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   //pwd must be ('^[a-zA-Z0-9]{3,30}$')
-  password: Joi.string().min(8).required(),
-});
+  password: Joi.string().min(8).required()
+})
 
 module.exports = {
   authSchema,
-  loginSchema,
-};
+  loginSchema
+}
