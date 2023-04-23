@@ -1,47 +1,55 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-const { randomUUID } = require('crypto')
 const { Schema } = mongoose
 
 const userSchema = new mongoose.Schema({
-  user_id: {
+  _id: {
     type: Schema.Types.ObjectId,
-    default: randomUUID(),
+    default: mongoose.Types.ObjectId,
     unique: true,
     required: true
   },
   name: {
-    type: Schema.Types.String,
-    required: true
+    type: String,
+    required: true,
+    trim: true
   },
   email: {
-    type: Schema.Types.String,
+    type: String,
     required: true,
     lowercase: true,
-    unique: true
+    unique: true,
+    trim: true
   },
   password: {
-    type: Schema.Types.String,
+    type: String,
     required: true
   },
   role: {
-    type: Schema.Types.String,
+    type: String,
     enum: ['supplier', 'retailer'],
     required: true
   },
   contact_number: {
-    type: Schema.Types.String,
-    required: true,
-    validate: {
-      validator: function (v) {
-        return /^\+92-\d{3}-\d{7}$/.test(v)
-      },
-      message: (props) => `${props.value} is not a valid phone number!`
-    }
+    type: String,
+    trim: true
   },
   updatedAt: {
     type: Date,
     default: Date.now
+  },
+  address: {
+    type: String,
+    trim: true
+  },
+  cnic: {
+    type: String,
+    unique: true,
+    trim: true
+  },
+  iban: {
+    type: String,
+    trim: true
   }
 })
 
