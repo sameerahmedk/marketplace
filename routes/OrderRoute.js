@@ -2,11 +2,11 @@ const express = require('express')
 const router = express.Router()
 const { verifyAccessToken } = require('../helpers/jwtHelper')
 const Order = require('../models/order')
-const Retailer = require('../models/retailer')
-const user = require('../models/user')
 
-// Place order
-router.post('/', verifyAccessToken, async (req, res) => {
+/**
+ * Place an order
+ */
+router.post('/', verifyAccessToken, async (req, res, next) => {
   try {
     const order = new Order(req.body)
     await order.save()
@@ -16,54 +16,79 @@ router.post('/', verifyAccessToken, async (req, res) => {
   }
 })
 
-// Get all orders by the logged in user
-router.get('/', verifyAccessToken, async (req, res) => {
+/**
+ * Get all orders by the logged in user
+ */
+const UserRole = {
+  SUPPLIER: 'supplier',
+  RETAILER: 'retailer'
+}
+
+router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
-    const user_id = req.user.user_id
-    const orders = await Order.find({
-      $or: [{ supplier_id: user_id }, { retailer_id: user_id }]
-    })
-    res.json(orders)
-  } catch (err) {
-    next(err)
+    const { role, _id } = req.user
+
+    switch (role) {
+      case UserRole.SUPPLIER: {
+        const supplierOrders = await Order.find({ supplier_id: _id })
+        res.json(supplierOrders)
+        break
+      }
+      case UserRole.RETAILER: {
+        const retailerOrders = await Order.find({ retailer_id: _id })
+        res.json(retailerOrders)
+        break
+      }
+      default:
+        throw new Error('Invalid user role')
+    }
+  } catch (error) {
+    next(error)
   }
 })
 
-// Get a specific order
+/**
+ * Get a specific order
+ */
 router.get('/:id', verifyAccessToken, getOrder, (req, res) => {
   res.json(res.order)
 })
 
-// Update order
-router.patch('/:id', verifyAccessToken, getOrder, async (req, res) => {
-  if (req.body.orderId != null) {
-    res.order.orderId = req.body.orderId
-  }
-  if (req.body.supplierId != null) {
-    res.order.supplierId = req.body.supplierId
-  }
-  if (req.body.name != null) {
-    res.order.name = req.body.name
-  }
-  if (req.body.description != null) {
-    res.order.description = req.body.description
-  }
-  if (req.body.unit_price != null) {
-    res.order.unit_price = req.body.unit_price
-  }
-  if (req.body.category != null) {
-    res.order.category = req.body.category
-  }
-  if (req.body.brand != null) {
-    res.order.brand = req.body.brand
-  }
-  if (req.body.quantity != null) {
-    res.order.quantity = req.body.quantity
-  }
-  if (req.body.image != null) {
-    res.order.image = req.body.image
-  }
+/**
+ * Update order
+ */
+router.patch('/:id', verifyAccessToken, getOrder, async (req, res, next) => {
   try {
+    if (!req.body) {
+      return res.status(400).json({ message: 'No fields provided to update' })
+    }
+    if (req.body.orderId != null) {
+      res.order.orderId = req.body.orderId
+    }
+    if (req.body.supplierId != null) {
+      res.order.supplierId = req.body.supplierId
+    }
+    if (req.body.name != null) {
+      res.order.name = req.body.name
+    }
+    if (req.body.description != null) {
+      res.order.description = req.body.description
+    }
+    if (req.body.unit_price != null) {
+      res.order.unit_price = req.body.unit_price
+    }
+    if (req.body.category != null) {
+      res.order.category = req.body.category
+    }
+    if (req.body.brand != null) {
+      res.order.brand = req.body.brand
+    }
+    if (req.body.quantity != null) {
+      res.order.quantity = req.body.quantity
+    }
+    if (req.body.image != null) {
+      res.order.image = req.body.image
+    }
     const updatedorder = await res.order.save()
     res.json(updatedorder)
   } catch (err) {
@@ -71,8 +96,10 @@ router.patch('/:id', verifyAccessToken, getOrder, async (req, res) => {
   }
 })
 
-// Delete an order
-router.delete('/:id', verifyAccessToken, getOrder, async (req, res) => {
+/**
+ * Delete an order
+ */
+router.delete('/:id', verifyAccessToken, getOrder, async (req, res, next) => {
   try {
     await res.order.remove()
     res.json({ message: 'Order deleted' })
@@ -81,15 +108,17 @@ router.delete('/:id', verifyAccessToken, getOrder, async (req, res) => {
   }
 })
 
-// Middleware function to get a single order by ID
+/**
+ * Middleware function to get a single order by ID
+ */
 async function getOrder(req, res, next) {
   let order
   try {
     order = await Order.findOne({
       order_id: req.params.id
     })
-    if (order == null) {
-      return res.status(404).json({ message: 'Cannot find order' })
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' })
     }
   } catch (err) {
     next(err)
