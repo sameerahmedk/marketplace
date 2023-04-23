@@ -1,27 +1,22 @@
 const mongoose = require('mongoose')
-const { v4: uuid } = require('uuid')
 
 const orderSchema = new mongoose.Schema({
-  _id: {
-    type: String,
-    default: uuid,
-    unique: true,
-    required: true
-  },
-  retailer_id: {
+  retailerId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'User'
+    ref: 'User',
+    index: true
   },
-  supplier_id: {
+  supplierId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'User'
+    ref: 'User',
+    index: true
   },
   products: [
     {
-      product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-      product_price: {
+      productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      productPrice: {
         type: Number,
         required: true,
         min: 0,
@@ -34,14 +29,14 @@ const orderSchema = new mongoose.Schema({
           }
         ]
       },
-      product_quantity: {
+      productQuantity: {
         type: Number,
         required: true,
         min: 0
       }
     }
   ],
-  total_price: {
+  totalPrice: {
     type: Number,
     required: true,
     min: 0,
@@ -50,7 +45,7 @@ const orderSchema = new mongoose.Schema({
         validator: function (val) {
           return val >= 0
         },
-        message: 'Total price must be positive'
+        message: 'Total price must not be negative'
       }
     ]
   }
