@@ -1,31 +1,34 @@
 const mongoose = require('mongoose')
-const { randomUUID } = require('crypto')
+const { v4: uuid } = require('uuid')
 
 const orderSchema = new mongoose.Schema({
   order_id: {
     type: String,
-    default: randomUUID(),
+    default: uuid,
     unique: true,
     required: true
   },
   retailer_id: {
-    type: mongoose.Schema.Types.String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'Retailer.retailer_id'
+    ref: 'User'
   },
   supplier_id: {
-    type: mongoose.Schema.Types.String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'Supplier.supplier_id'
+    ref: 'User'
   },
   products: [
     {
-      ref: 'Product.product_id',
-      ref: 'Product.product_price',
-      product_quantity: Number
+      product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      product_price: { type: Number, required: true },
+      product_quantity: { type: Number, required: true }
     }
   ],
-  total_price: Double
+  total_price: {
+    type: mongoose.Schema.Types.Number,
+    required: true
+  }
 })
 
 module.exports = mongoose.model('Order', orderSchema)
