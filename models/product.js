@@ -1,44 +1,54 @@
 const mongoose = require('mongoose')
-const { randomUUID } = require('crypto')
+const { Schema } = mongoose
 
-const productSchema = new mongoose.Schema({
-  productId: {
-    type: String,
-    default: randomUUID(),
+const productSchema = new Schema({
+  _id: {
+    type: Schema.Types.ObjectId,
     required: true,
     unique: true
   },
-  supplierId: {
-    type: String,
+  supplier: {
+    type: Schema.Types.ObjectId,
+    ref: 'User._id',
     required: true
   },
   name: {
-    type: String,
+    type: Schema.Types.String,
     required: true
   },
   description: {
-    type: String,
+    type: Schema.Types.String,
     required: true
   },
-  unit_price: {
-    type: Number,
-    required: true
+  unitPrice: {
+    type: Schema.Types.Number,
+    required: true,
+    min: 0,
+    max: 100000
   },
   category: {
-    type: String,
+    type: Schema.Types.String,
     required: true
   },
   brand: {
-    type: String,
+    type: Schema.Types.String,
     required: true
   },
   quantity: {
-    type: Number,
-    required: true
+    type: Schema.Types.Number,
+    required: true,
+    min: 0,
+    max: 10000
   },
   image: {
-    type: String,
-    required: true
+    type: Schema.Types.String,
+    required: [true, 'image is required'],
+    validate: {
+      validator: (v) => {
+        return /\.(jpe?g|png|gif|bmp)$/i.test(v)
+      },
+      message: 'invalid image file format'
+    }
   }
 })
 
