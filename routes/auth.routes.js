@@ -1,4 +1,3 @@
-const cookie = require('cookie')
 const express = require('express')
 const router = express.Router()
 const createError = require('http-errors')
@@ -11,11 +10,10 @@ const {
 } = require('../helpers/jwtHelper')
 
 router.post('/register', async (req, res, next) => {
-  //res.send("Register route")
   try {
     const result = await authSchema.validateAsync(req.body)
     const doesExist = await User.findOne({
-      email: result.email
+      email: result.email.toLowerCase().trim()
     })
     if (doesExist)
       throw createError.Conflict(`${result.email} is already registered`)
@@ -26,34 +24,36 @@ router.post('/register', async (req, res, next) => {
     const refreshToken = await signRefreshToken(savedUser.id)
     res.send({ accessToken, refreshToken })
   } catch (error) {
-    if (error.isJoi === true) error.status = 422
+    if (error.isJoi === true) {
+      return next(createError.BadRequest(error.message))
+    }
     next(error)
   }
 })
 
 router.post('/login', async (req, res, next) => {
-  //res.send("Login route")
   try {
     const result = await loginSchema.validateAsync(req.body)
     const user = await User.findOne({
-      email: result.email
+      email: result.email.toLowerCase().trim()
     })
-    if (!user) throw createError.NotFound('User not registered')
+    if (!user) {
+      throw createError.NotFound('User not registered')
+    }
 
     const isMatchPassword = await user.isValidPassword(result.password)
-    //const isMatchEmail = await user.isValidEmail(result.email)
-    if (!isMatchPassword)
+    if (!isMatchPassword) {
       throw createError.Unauthorized('Username/Password not valid.')
+    }
 
     const accessToken = await signAccessToken(user.id)
     const refreshToken = await signRefreshToken(user.id)
 
-    await res.send({ accessToken, refreshToken })
-
-    await res.send(result)
+    res.send({ accessToken, refreshToken })
   } catch (error) {
-    if (error.isJoi === true)
+    if (error.isJoi === true) {
       return next(createError.BadRequest('Invalid Username/Password'))
+    }
     next(error)
   }
 })
@@ -61,7 +61,10 @@ router.post('/login', async (req, res, next) => {
 router.post('/refresh-token', async (req, res, next) => {
   try {
     const { refreshToken } = req.body
-    if (!refreshToken) throw createError.BadRequest()
+    if (!refreshToken) {
+      throw createError.BadRequest('Refresh token missing')
+    }
+
     const userId = await verifyRefreshToken(refreshToken)
 
     const accessToken = await signAccessToken(userId)
@@ -71,6 +74,9 @@ router.post('/refresh-token', async (req, res, next) => {
       refreshToken: refToken
     })
   } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return next(createError.BadRequest('Refresh token expired'))
+    }
     next(error)
   }
 })
