@@ -1,8 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
-const SupplierRoute = require('./routes/SupplierRoute')
-const RetailerRoute = require('./routes/RetailerRoute')
 const ProductRoute = require('./routes/ProductRoute')
 const bodyParser = require('body-parser')
 const authRouter = require('./routes/auth.routes')
@@ -18,8 +16,6 @@ app.use(cors(corsOptions))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/auth', authRouter)
-app.use('/supplier', SupplierRoute)
-app.use('/retailer', RetailerRoute)
 app.use('/product', ProductRoute)
 
 const { MONGO_URI, PORT } = process.env
