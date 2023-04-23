@@ -8,6 +8,19 @@ const {
   signRefreshToken,
   verifyRefreshToken
 } = require('../helpers/jwtHelper')
+const authMiddleware = require('../middlewares/auth')
+
+router.get('/profile', authMiddleware, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password')
+    if (!user) {
+      throw createError.NotFound('User not found')
+    }
+    res.send(user)
+  } catch (error) {
+    next(error)
+  }
+})
 
 router.post('/register', async (req, res, next) => {
   try {
