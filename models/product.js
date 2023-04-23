@@ -38,7 +38,7 @@ const productSchema = new Schema({
     type: Schema.Types.Number,
     required: true,
     min: 0,
-    max: 10000
+    max: 100000
   },
   image: {
     type: Schema.Types.String,
