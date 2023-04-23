@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const { verifyAccessToken } = require('../helpers/jwtHelper')
+const authMiddleware = require('../middlewares/auth')
 const Product = require('../models/product')
 const getProduct = require('../middlewares/product/getProduct')
-const { validateProduct } = require('../middlewares/validateProduct')
+const { validateProduct } = require('../middlewares/product/validateProduct')
 
 // Create a product
-router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
+router.post('/', authMiddleware, validateProduct, async (req, res, next) => {
   try {
     // Check if user role is supplier
     if (req.user.role !== 'supplier') {
@@ -21,7 +21,7 @@ router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
 })
 
 // Get all products
-router.get('/', verifyAccessToken, async (req, res, next) => {
+router.get('/', authMiddleware, async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 10
     const skip = parseInt(req.query.skip) || 0
@@ -35,7 +35,7 @@ router.get('/', verifyAccessToken, async (req, res, next) => {
 })
 
 // Get a single product
-router.get('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
+router.get('/:id', authMiddleware, getProduct, async (req, res, next) => {
   try {
     res.json(req.product)
   } catch (err) {
@@ -46,7 +46,7 @@ router.get('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
 // Update a product
 router.put(
   '/:id',
-  verifyAccessToken,
+  authMiddleware,
   getProduct,
   validateProduct,
   async (req, res, next) => {
@@ -73,7 +73,7 @@ router.put(
 )
 
 // Delete a product
-router.delete('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
+router.delete('/:id', authMiddleware, getProduct, async (req, res, next) => {
   try {
     // Check if user role is supplier
     if (req.user.role !== 'supplier') {

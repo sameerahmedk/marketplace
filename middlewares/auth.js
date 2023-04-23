@@ -1,4 +1,4 @@
-const { verifyAccessToken } = require('../helpers/jwt_helper')
+const { verifyAccessToken } = require('../helpers/jwtHelper')
 
 const authMiddleware = async (req, res, next) => {
   try {
