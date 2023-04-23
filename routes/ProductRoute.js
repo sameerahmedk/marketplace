@@ -8,6 +8,10 @@ const { validateProduct } = require('../middlewares/validateProduct')
 // Create a product
 router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
   try {
+    // Check if user role is supplier
+    if (req.user.role !== 'supplier') {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
     const product = new Product(req.validatedProduct)
     await product.save()
     res.status(201).json(product)
@@ -47,6 +51,10 @@ router.put(
   validateProduct,
   async (req, res, next) => {
     try {
+      // Check if user role is supplier
+      if (req.user.role !== 'supplier') {
+        return res.status(403).json({ message: 'Forbidden' })
+      }
       const { product, validatedProduct } = req
       const updates = validatedProduct
 
@@ -67,6 +75,10 @@ router.put(
 // Delete a product
 router.delete('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
   try {
+    // Check if user role is supplier
+    if (req.user.role !== 'supplier') {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
     await req.product.remove()
     res.json({ message: 'Product deleted' })
   } catch (err) {
