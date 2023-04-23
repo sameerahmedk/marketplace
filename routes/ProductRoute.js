@@ -2,93 +2,76 @@ const express = require('express')
 const router = express.Router()
 const { verifyAccessToken } = require('../helpers/jwtHelper')
 const Product = require('../models/product')
+const getProduct = require('../middlewares/product/getProduct')
+const { validateProduct } = require('../middlewares/validateProduct')
 
 // Create a product
-router.post('/', verifyAccessToken, async (req, res) => {
+router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
   try {
-    const product = new Product(req.body)
+    const product = new Product(req.validatedProduct)
     await product.save()
     res.status(201).json(product)
   } catch (err) {
-    res.status(400).json({ message: err.message })
+    next(err)
   }
 })
 
 // Get all products
-router.get('/', verifyAccessToken, async (req, res) => {
+router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
-    const products = await Product.find()
+    const limit = parseInt(req.query.limit) || 10
+    const skip = parseInt(req.query.skip) || 0
+    const filter = req.query.filter || {}
+
+    const products = await Product.find(filter).limit(limit).skip(skip)
     res.json(products)
   } catch (err) {
-    res.status(500).json({ message: err.message })
+    next(err)
   }
 })
 
 // Get a single product
-router.get('/:id', verifyAccessToken, getProduct, (req, res) => {
-  res.json(res.product)
+router.get('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
+  try {
+    res.json(req.product)
+  } catch (err) {
+    next(err)
+  }
 })
 
 // Update a product
-router.patch('/:id', verifyAccessToken, getProduct, async (req, res) => {
-  if (req.body.productId != null) {
-    res.product.productId = req.body.productId
+router.put(
+  '/:id',
+  verifyAccessToken,
+  getProduct,
+  validateProduct,
+  async (req, res, next) => {
+    try {
+      const { product, validatedProduct } = req
+      const updates = validatedProduct
+
+      Object.keys(updates).forEach((prop) => {
+        if (Object.prototype.hasOwnProperty.call(product, prop)) {
+          product[prop] = updates[prop]
+        }
+      })
+
+      const updatedProduct = await product.save()
+      res.json(updatedProduct)
+    } catch (error) {
+      next(error)
+    }
   }
-  if (req.body.supplierId != null) {
-    res.product.supplierId = req.body.supplierId
-  }
-  if (req.body.name != null) {
-    res.product.name = req.body.name
-  }
-  if (req.body.description != null) {
-    res.product.description = req.body.description
-  }
-  if (req.body.unit_price != null) {
-    res.product.unit_price = req.body.unit_price
-  }
-  if (req.body.category != null) {
-    res.product.category = req.body.category
-  }
-  if (req.body.brand != null) {
-    res.product.brand = req.body.brand
-  }
-  if (req.body.quantity != null) {
-    res.product.quantity = req.body.quantity
-  }
-  if (req.body.image != null) {
-    res.product.image = req.body.image
-  }
-  try {
-    const updatedProduct = await res.product.save()
-    res.json(updatedProduct)
-  } catch (err) {
-    res.status(400).json({ message: err.message })
-  }
-})
+)
 
 // Delete a product
-router.delete('/:id', verifyAccessToken, getProduct, async (req, res) => {
+router.delete('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
   try {
-    await res.product.remove()
+    await req.product.remove()
     res.json({ message: 'Product deleted' })
   } catch (err) {
-    res.status(500).json({ message: err.message })
+    next(err)
   }
 })
-
-// Middleware function to get a single product by ID
-async function getProduct(req, res, next) {
-  let product
-  try {
-    product = await Product.findById(req.params.id)
-    if (product == null) {
-      return res.status(404).json({ message: 'Cannot find product' })
-    }
-  } catch (err) {
-    return res.status(500).json({ message: err.message })
-  }
-  res.product = product
-  next()
-}
 
 module.exports = router
