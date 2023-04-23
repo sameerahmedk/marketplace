@@ -1,34 +1,48 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const { randomUUID } = require('crypto')
+const { Schema } = mongoose
 
 const userSchema = new mongoose.Schema({
   user_id: {
-    type: String,
+    type: Schema.Types.ObjectId,
     default: randomUUID(),
     unique: true,
     required: true
   },
   name: {
-    type: String,
+    type: Schema.Types.String,
     required: true
   },
   email: {
-    type: String,
+    type: Schema.Types.String,
     required: true,
     lowercase: true,
     unique: true
   },
   password: {
-    type: String,
+    type: Schema.Types.String,
     required: true
   },
   role: {
-    type: mongoose.Schema.Types.String,
-    ref: 'Role.role_name',
+    type: Schema.Types.String,
+    enum: ['supplier', 'retailer'],
     required: true
   },
-  contact_number: { type: String, required: true }
+  contact_number: {
+    type: Schema.Types.String,
+    required: true,
+    validate: {
+      validator: function (v) {
+        return /^\+92-\d{3}-\d{7}$/.test(v)
+      },
+      message: (props) => `${props.value} is not a valid phone number!`
+    }
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 })
 
 userSchema.pre('save', async function (next) {
@@ -36,6 +50,7 @@ userSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(this.password, salt)
     this.password = hashedPassword
+    this.email = this.email.toLowerCase()
     next()
   } catch (error) {
     next(error)
