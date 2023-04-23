@@ -7,9 +7,9 @@ module.exports = {
       const payload = {}
       const secret = process.env.ACCESS_TOKEN_SECRET
       const options = {
-        expiresIn: '60s',
-        issuer: 'pickurpage.com',
-        audience: userId
+        expiresIn: '60m',
+        issuer: 'dastgyr.com',
+        audience: userId.toString()
       }
       JWT.sign(payload, secret, options, (err, token) => {
         if (err) {
@@ -34,6 +34,10 @@ module.exports = {
           return next(createError.Unauthorized(err.message))
         }
       }
+      // add a check to ensure the payload contains the expected values
+      if (!payload.aud || !payload.iss) {
+        return next(createError.Unauthorized())
+      }
       req.payload = payload
       next()
     })
@@ -44,9 +48,9 @@ module.exports = {
       const payload = {}
       const secret = process.env.REFRESH_TOKEN_SECRET
       const options = {
-        expiresIn: '1y',
-        issuer: 'pickurpage.com',
-        audience: userId
+        expiresIn: '24h',
+        issuer: 'dastgyr.com',
+        audience: userId.toString()
       }
       JWT.sign(payload, secret, options, (err, token) => {
         if (err) {
@@ -66,6 +70,9 @@ module.exports = {
         (err, payload) => {
           if (err) return reject(createError.Unauthorized())
           const userId = payload.aud
+          if (!userId) {
+            return reject(createError.Unauthorized())
+          }
           resolve(userId)
         }
       )
