@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const { v4: uuid } = require('uuid')
 
 const orderSchema = new mongoose.Schema({
-  order_id: {
+  _id: {
     type: String,
     default: uuid,
     unique: true,
@@ -21,13 +21,38 @@ const orderSchema = new mongoose.Schema({
   products: [
     {
       product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-      product_price: { type: Number, required: true },
-      product_quantity: { type: Number, required: true }
+      product_price: {
+        type: Number,
+        required: true,
+        min: 0,
+        validate: [
+          {
+            validator: function (val) {
+              return val > 0
+            },
+            message: 'Product price must be greater than zero'
+          }
+        ]
+      },
+      product_quantity: {
+        type: Number,
+        required: true,
+        min: 0
+      }
     }
   ],
   total_price: {
-    type: mongoose.Schema.Types.Number,
-    required: true
+    type: Number,
+    required: true,
+    min: 0,
+    validate: [
+      {
+        validator: function (val) {
+          return val >= 0
+        },
+        message: 'Total price must be positive'
+      }
+    ]
   }
 })
 
