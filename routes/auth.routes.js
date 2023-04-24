@@ -6,13 +6,17 @@ const { authSchema, loginSchema } = require('../helpers/validationSchema')
 const {
   signAccessToken,
   signRefreshToken,
-  verifyRefreshToken
+  verifyRefreshToken,
+  verifyAccessToken
 } = require('../helpers/jwtHelper')
 const authMiddleware = require('../middlewares/auth')
 
-router.get('/profile', authMiddleware, async (req, res, next) => {
+router.get('/profile', verifyAccessToken, async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select('-password')
+    //const user = await User.findById(req.user.id).select('-password')
+
+    const user = await User.findById(req.body.id).select('-password')
+    console.log(user)
     if (!user) {
       throw createError.NotFound('User not found')
     }

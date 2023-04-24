@@ -4,9 +4,15 @@ const authMiddleware = require('../middlewares/auth')
 const Product = require('../models/product')
 const getProduct = require('../middlewares/product/getProduct')
 const { validateProduct } = require('../middlewares/product/validateProduct')
+const {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+  verifyAccessToken
+} = require('../helpers/jwtHelper')
 
 // Create a product
-router.post('/', authMiddleware, validateProduct, async (req, res, next) => {
+router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
   try {
     // Check if user role is supplier
     // if (req.user.role !== 'supplier') {
@@ -21,7 +27,7 @@ router.post('/', authMiddleware, validateProduct, async (req, res, next) => {
 })
 
 // Get all products
-router.get('/', authMiddleware, async (req, res, next) => {
+router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 10
     const skip = parseInt(req.query.skip) || 0

@@ -23,7 +23,8 @@ const validateProduct = [
       image: req.body.image,
       quantity: req.body.quantity,
       supplier: req.body.supplier,
-      brand: req.body.brand
+      brand: req.body.brand,
+      discount: req.body.discount
     }
 
     next()
