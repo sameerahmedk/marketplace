@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator')
 
 const validateProduct = [
   body('name', 'Product name is required').trim().isLength({ min: 1 }),
-  body('price', 'Price must be a number').isFloat(),
+  body('unitPrice', 'Price must be a number').isFloat(),
   body('description', 'Description must not exceed 200 characters')
     .optional({ checkFalsy: true })
     .isLength({ max: 200 }),
@@ -17,9 +17,13 @@ const validateProduct = [
 
     req.validatedProduct = {
       name: req.body.name,
-      price: req.body.price,
+      unitPrice: req.body.unitPrice,
       description: req.body.description,
-      category: req.body.category
+      category: req.body.category,
+      image: req.body.image,
+      quantity: req.body.quantity,
+      supplier: req.body.supplier,
+      brand: req.body.brand
     }
 
     next()
