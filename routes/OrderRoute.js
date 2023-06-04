@@ -3,6 +3,7 @@ const router = express.Router()
 const { verifyAccessToken } = require('../helpers/jwtHelper')
 const Order = require('../models/order')
 
+const User = require('../models/user')
 /**
  * Place an order
  */
@@ -26,16 +27,24 @@ const UserRole = {
 
 router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
-    const { role, _id } = req.user
+    // const { role, _id } = req.user
+    const role = req.headers['role']
+    const userId = req.headers['userid']
 
+    console.log(role)
+    console.log(userId)
     switch (role) {
       case UserRole.SUPPLIER: {
-        const supplierOrders = await Order.find({ supplier_id: _id })
-        res.json(supplierOrders)
+        const supplierOrders = await Order.find({ supplierId: userId })
+        const supplierName = await User.findOne({ _id: userId })
+        const supplierName2 = await supplierName.name
+        console.log(supplierName)
+        console.log(supplierName2)
+        res.json({ supplierOrders, supplierName2 })
         break
       }
       case UserRole.RETAILER: {
-        const retailerOrders = await Order.find({ retailer_id: _id })
+        const retailerOrders = await Order.find({ retailerId: userId })
         res.json(retailerOrders)
         break
       }
@@ -115,7 +124,7 @@ async function getOrder(req, res, next) {
   let order
   try {
     order = await Order.findOne({
-      order_id: req.params.id
+      _id: req.params.id
     })
     if (!order) {
       return res.status(404).json({ message: 'Order not found' })
