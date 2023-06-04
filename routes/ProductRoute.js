@@ -79,14 +79,21 @@ router.put(
 )
 
 // Delete a product
-router.delete('/:id', authMiddleware, getProduct, async (req, res, next) => {
+router.delete('/:id', authMiddleware, async (req, res, next) => {
+  // Check if user role is supplier
+  // if (req.user.role !== 'supplier') {
+  //   return res.status(403).json({ message: 'Forbidden' })
+  // } //not neccessary because of the authMiddleware. logically not correct.
+  //GetProduct nai use kar rahy ab hum is API mein
   try {
-    // Check if user role is supplier
-    if (req.user.role !== 'supplier') {
-      return res.status(403).json({ message: 'Forbidden' })
+    // Find and remove the product from the database
+    const productId = req.params.id
+
+    const result = await Product.deleteOne({ _id: productId })
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Product not found' })
     }
-    await req.product.remove()
-    res.json({ message: 'Product deleted' })
+    return res.json({ message: 'Product deleted successfully' })
   } catch (err) {
     next(err)
   }
