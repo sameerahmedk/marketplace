@@ -13,6 +13,11 @@ const orderSchema = new mongoose.Schema({
     ref: 'User',
     index: true
   },
+  status: {
+    type: String,
+    enum: ['pending', 'accepted', 'rejected', 'completed'],
+    default: 'pending'
+  },
   products: [
     {
       productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
