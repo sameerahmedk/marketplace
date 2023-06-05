@@ -15,6 +15,11 @@ const validateProduct = [
       return res.status(400).json({ errors: errors.array() })
     }
 
+    // Check if user role is 'supplier'
+    if (req.user.role !== 'supplier') {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
+
     req.validatedProduct = {
       name: req.body.name,
       unitPrice: req.body.unitPrice,

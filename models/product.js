@@ -1,8 +1,40 @@
 const mongoose = require('mongoose')
 
-const productSchema = new mongoose.Schema({
+const { Schema } = mongoose
+
+const discountSchema = new Schema({
+  quantity: {
+    type: Number,
+    required: true,
+    index: true
+  },
+  percentage: {
+    type: Number,
+    required: true,
+    default: 0
+  }
+})
+
+const variationOptionSchema = new Schema({
+  option: {
+    type: String,
+    required: true,
+    trim: true,
+    index: true
+  },
+  quantity: {
+    type: Number,
+    default: 0
+  }
+})
+
+const variationsSchema = new Schema({
+  options: [variationOptionSchema]
+})
+
+const productSchema = new Schema({
   supplier: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
     index: true
@@ -19,23 +51,15 @@ const productSchema = new mongoose.Schema({
   unitPrice: {
     type: Number,
     required: true,
-    min: 0,
-    max: 100000
+    min: 0
   },
   category: {
     type: String,
-    required: true,
     trim: true
   },
   brand: {
     type: String,
     trim: true
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 0,
-    max: 100000
   },
   image: {
     type: String,
@@ -45,9 +69,11 @@ const productSchema = new mongoose.Schema({
       validator: function (v) {
         return /\.(jpe?g|png|gif|bmp)$/i.test(v)
       },
-      message: 'invalid image file format'
+      message: 'Invalid image file format'
     }
-  }
+  },
+  discount: [discountSchema],
+  variations: [variationsSchema]
 })
 
 const Product = mongoose.model('Product', productSchema)
