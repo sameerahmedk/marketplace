@@ -5,7 +5,7 @@ const getProduct = require('../middlewares/product/getProduct')
 const { validateProduct } = require('../middlewares/product/validateProduct')
 const { verifyAccessToken } = require('../helpers/jwtHelper')
 
-// Create a product
+// Create product(s)
 router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
   try {
     // Check if user role is 'supplier'
@@ -13,12 +13,21 @@ router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
       return res.status(403).json({ message: 'Forbidden' })
     }
 
-    // Set the supplier ID in req.validatedProduct
-    req.validatedProduct.supplier = req.user.id
+    let products = req.body
+    if (!Array.isArray(products)) {
+      // If it's not an array, convert it to a single-item array
+      products = [products]
+    }
 
-    const product = new Product(req.validatedProduct)
-    await product.save()
-    res.status(201).json(product)
+    // Set the supplier ID for each product in the array
+    const supplierId = req.user.id
+    products = products.map((product) => ({
+      ...product,
+      supplier: supplierId
+    }))
+
+    const createdProducts = await Product.insertMany(products)
+    res.status(201).json(createdProducts)
   } catch (err) {
     next(err)
   }

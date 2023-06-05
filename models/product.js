@@ -60,13 +60,7 @@ const productSchema = new Schema({
   image: {
     type: String,
     required: true,
-    trim: true,
-    validate: {
-      validator: function (v) {
-        return /\.(jpe?g|png|gif|bmp)$/i.test(v)
-      },
-      message: 'Invalid image file format'
-    }
+    trim: true
   },
   discount: [discountSchema],
   variations: [variationOptionSchema]
