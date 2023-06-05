@@ -64,6 +64,32 @@ router.get('/:id', verifyAccessToken, getOrder, (req, res) => {
 })
 
 /**
+ * Update order status
+ */
+router.put('/:id/status', async (req, res) => {
+  const { orderId } = req.params
+  const { status } = req.body
+
+  try {
+    // Find the order by orderId
+    const order = await Order.findById(orderId)
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' })
+    }
+
+    // Update the status of the order
+    order.status = status
+    await order.save()
+
+    res.json({ message: 'Order status updated successfully' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+/**
  * Update order
  */
 router.patch('/:id', verifyAccessToken, getOrder, async (req, res, next) => {

@@ -9,7 +9,7 @@ const {
   verifyRefreshToken,
   verifyAccessToken
 } = require('../helpers/jwtHelper')
-const authMiddleware = require('../middlewares/auth')
+// const authMiddleware = require('../middlewares/auth')
 
 router.get('/profile', verifyAccessToken, async (req, res, next) => {
   try {
