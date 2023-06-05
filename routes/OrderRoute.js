@@ -26,16 +26,16 @@ const UserRole = {
 
 router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
-    const { role, _id } = req.user
+    const { role, userId } = req.user
 
     switch (role) {
       case UserRole.SUPPLIER: {
-        const supplierOrders = await Order.find({ supplier_id: _id })
+        const supplierOrders = await Order.find({ supplierId: userId })
         res.json(supplierOrders)
         break
       }
       case UserRole.RETAILER: {
-        const retailerOrders = await Order.find({ retailer_id: _id })
+        const retailerOrders = await Order.findById({ retailerId: userId })
         res.json(retailerOrders)
         break
       }
@@ -52,6 +52,31 @@ router.get('/', verifyAccessToken, async (req, res, next) => {
  */
 router.get('/:id', verifyAccessToken, getOrder, (req, res) => {
   res.json(res.order)
+})
+
+/**
+ * Update order status
+ */
+router.put('/:id/status', async (req, res, next) => {
+  const { orderId } = req.params
+  const { status } = req.body
+
+  try {
+    // Find the order by orderId
+    const order = await Order.findById(orderId)
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' })
+    }
+
+    // Update the status of the order
+    order.status = status
+    await order.save()
+
+    res.json({ message: 'Order status updated to: ', status })
+  } catch (error) {
+    next(error)
+  }
 })
 
 /**
@@ -114,9 +139,7 @@ router.delete('/:id', verifyAccessToken, getOrder, async (req, res, next) => {
 async function getOrder(req, res, next) {
   let order
   try {
-    order = await Order.findOne({
-      order_id: req.params.id
-    })
+    order = await Order.findById(req.params.id)
     if (!order) {
       return res.status(404).json({ message: 'Order not found' })
     }
