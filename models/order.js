@@ -2,9 +2,18 @@ const mongoose = require('mongoose')
 const Product = require('./product')
 
 const { Schema } = mongoose
-
 const orderProductSchema = new Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true,
+    index: true
+  },
+  supplierId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true
+  },
   productPrice: {
     type: Number,
     required: true,
@@ -26,12 +35,6 @@ const orderProductSchema = new Schema({
 
 const orderSchema = new Schema({
   retailerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'User',
-    index: true
-  },
-  supplierId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',

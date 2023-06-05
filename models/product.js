@@ -28,10 +28,6 @@ const variationOptionSchema = new Schema({
   }
 })
 
-const variationsSchema = new Schema({
-  options: [variationOptionSchema]
-})
-
 const productSchema = new Schema({
   supplier: {
     type: Schema.Types.ObjectId,
@@ -73,7 +69,7 @@ const productSchema = new Schema({
     }
   },
   discount: [discountSchema],
-  variations: [variationsSchema]
+  variations: [variationOptionSchema]
 })
 
 const Product = mongoose.model('Product', productSchema)

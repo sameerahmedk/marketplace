@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { verifyAccessToken } = require('../helpers/jwtHelper')
 const Order = require('../models/order')
-
+const User = require('../models/user')
 /**
  * Place an order
  */
@@ -26,11 +26,17 @@ const UserRole = {
 
 router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
-    const { role, userId } = req.user
+    // const { role, userId } = req.user
+
+    const role = req.headers['role']
+    const userId = req.headers['userid']
 
     switch (role) {
       case UserRole.SUPPLIER: {
-        const supplierOrders = await Order.find({ supplierId: userId })
+        const supplierOrders = await Order.find({
+          'products.supplierId': userId
+        })
+
         res.json(supplierOrders)
         break
       }

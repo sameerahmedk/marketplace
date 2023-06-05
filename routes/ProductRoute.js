@@ -82,17 +82,29 @@ router.put(
 
 // Delete a product
 router.delete('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
-  try {
-    // Check if user role is 'supplier'
-    if (
-      req.user.role !== 'supplier' ||
-      req.product.supplier.toString() !== req.user.id
-    ) {
-      return res.status(403).json({ message: 'Forbidden' })
-    }
+  // try {
+  //   // Check if user role is 'supplier'
+  //   if (
+  //     req.user.role !== 'supplier' ||
+  //     req.product.supplier.toString() !== req.user.id
+  //   ) {
+  //     return res.status(403).json({ message: 'Forbidden' })
+  //   }
 
-    await req.product.remove()
-    res.json({ message: 'Product deleted' })
+  //   await req.product.remove()
+  //   res.json({ message: 'Product deleted' })
+  // } catch (err) {
+  //   next(err)
+  // }
+  try {
+    // Find and remove the product from the database
+    const productId = req.params.id
+
+    const result = await Product.deleteOne({ _id: productId })
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Product not found' })
+    }
+    return res.json({ message: 'Product deleted successfully' })
   } catch (err) {
     next(err)
   }

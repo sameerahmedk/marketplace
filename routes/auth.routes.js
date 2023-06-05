@@ -61,7 +61,9 @@ router.post('/login', async (req, res, next) => {
 
     const accessToken = await signAccessToken(user.id, user.role)
     const refreshToken = await signRefreshToken(user.id)
-    res.send({ accessToken, refreshToken })
+    const userRole = await user.role
+    const userId = await user._id
+    res.send({ accessToken, refreshToken, userRole, userId })
   } catch (error) {
     if (error.isJoi === true) {
       return next(createError.BadRequest(error.message))
