@@ -4,7 +4,17 @@ const Product = require('./product')
 const { Schema } = mongoose
 
 const orderProductSchema = new Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true,
+    index: true
+  },
+  supplierId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true
+  },
   productPrice: {
     type: Number,
     required: true,
@@ -26,12 +36,6 @@ const orderProductSchema = new Schema({
 
 const orderSchema = new Schema({
   retailerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'User',
-    index: true
-  },
-  supplierId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
@@ -82,6 +86,12 @@ orderSchema.methods.calculateFinalPrice = async function () {
       throw new Error('Insufficient quantity for the selected variation.')
     }
 
+    // Reduce the quantity of the selected option
+    selectedOption.quantity -= productQuantity
+
+    // Save the updated product
+    await selectedProduct.save()
+
     // Calculate the final price based on quantity and selected options
     let finalPrice = productPrice * productQuantity
 
@@ -103,9 +113,6 @@ orderSchema.methods.calculateFinalPrice = async function () {
 
     // Update the final price in the order product
     product.finalPrice = finalPrice
-
-    // You can also update the selectedOptions property if needed
-    product.selectedOptions = selectedOptions
   }
 
   // Calculate the total price of the order

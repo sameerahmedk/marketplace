@@ -2,13 +2,27 @@ const express = require('express')
 const router = express.Router()
 const { verifyAccessToken } = require('../helpers/jwtHelper')
 const Order = require('../models/order')
+const getProduct = require('../middlewares/product/getProduct')
 
 /**
  * Place an order
  */
-router.post('/', verifyAccessToken, async (req, res, next) => {
+router.post('/', verifyAccessToken, getProduct, async (req, res, next) => {
   try {
-    const order = new Order(req.body)
+    // Grab retailerId from req.user if role is retailer
+    const retailerId = req.user.role === 'retailer' ? req.user.id : null
+
+    const orderProducts = req.body.products.map((product) => ({
+      ...product,
+      supplierId: req.product.supplierId // Retrieve the supplierId from the product
+    }))
+
+    const order = new Order({
+      ...req.body,
+      retailerId,
+      products: orderProducts
+    })
+
     await order.save()
     res.status(201).json(order)
   } catch (err) {
