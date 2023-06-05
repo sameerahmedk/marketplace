@@ -1,13 +1,21 @@
 const express = require('express')
 const router = express.Router()
-const authMiddleware = require('../middlewares/auth')
 const Product = require('../models/product')
 const getProduct = require('../middlewares/product/getProduct')
 const { validateProduct } = require('../middlewares/product/validateProduct')
+const { verifyAccessToken } = require('../helpers/jwtHelper')
 
 // Create a product
-router.post('/', authMiddleware, validateProduct, async (req, res, next) => {
+router.post('/', verifyAccessToken, validateProduct, async (req, res, next) => {
   try {
+    // Check if user role is 'supplier'
+    if (req.user.role !== 'supplier') {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
+
+    // Set the supplier ID in req.validatedProduct
+    req.validatedProduct.supplier = req.user.id
+
     const product = new Product(req.validatedProduct)
     await product.save()
     res.status(201).json(product)
@@ -17,7 +25,7 @@ router.post('/', authMiddleware, validateProduct, async (req, res, next) => {
 })
 
 // Get all products
-router.get('/', authMiddleware, async (req, res, next) => {
+router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 10
     const skip = parseInt(req.query.skip) || 0
@@ -31,7 +39,7 @@ router.get('/', authMiddleware, async (req, res, next) => {
 })
 
 // Get a single product
-router.get('/:id', authMiddleware, getProduct, async (req, res, next) => {
+router.get('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
   try {
     res.json(req.product)
   } catch (err) {
@@ -42,13 +50,16 @@ router.get('/:id', authMiddleware, getProduct, async (req, res, next) => {
 // Update a product
 router.put(
   '/:id',
-  authMiddleware,
+  verifyAccessToken,
   getProduct,
   validateProduct,
   async (req, res, next) => {
     try {
-      // Check if user role is supplier
-      if (req.user.role !== 'supplier') {
+      // Check if user role is 'supplier'
+      if (
+        req.user.role !== 'supplier' ||
+        req.product.supplier.toString() !== req.user.id
+      ) {
         return res.status(403).json({ message: 'Forbidden' })
       }
 
@@ -70,7 +81,7 @@ router.put(
 )
 
 // Delete a product
-router.delete('/:id', authMiddleware, getProduct, async (req, res, next) => {
+router.delete('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
   try {
     // Check if user role is 'supplier'
     if (

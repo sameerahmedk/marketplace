@@ -6,11 +6,11 @@ const { authSchema, loginSchema } = require('../helpers/validationSchema')
 const {
   signAccessToken,
   signRefreshToken,
-  verifyRefreshToken
+  verifyRefreshToken,
+  verifyAccessToken
 } = require('../helpers/jwtHelper')
-const authMiddleware = require('../middlewares/auth')
 
-router.get('/profile', authMiddleware, async (req, res, next) => {
+router.get('/profile', verifyAccessToken, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select('-password')
     if (!user) {
@@ -59,14 +59,12 @@ router.post('/login', async (req, res, next) => {
       throw createError.Unauthorized('Username/Password not valid.')
     }
 
-    const accessToken = await signAccessToken(user.id)
+    const accessToken = await signAccessToken(user.id, user.role)
     const refreshToken = await signRefreshToken(user.id)
-    const userRole = user.role
-    const userId = user._id
-    res.send({ accessToken, refreshToken, userRole, userId })
+    res.send({ accessToken, refreshToken })
   } catch (error) {
     if (error.isJoi === true) {
-      return next(createError.BadRequest('Invalid Username/Password'))
+      return next(createError.BadRequest(error.message))
     }
     next(error)
   }

@@ -2,14 +2,16 @@ const JWT = require('jsonwebtoken')
 const createError = require('http-errors')
 
 module.exports = {
-  signAccessToken: (userId) => {
+  signAccessToken: (userId, userRole) => {
     return new Promise((resolve, reject) => {
-      const payload = {}
+      const payload = {
+        aud: userId.toString(),
+        userRole: userRole
+      }
       const secret = process.env.ACCESS_TOKEN_SECRET
       const options = {
         expiresIn: '1w',
-        issuer: 'dastgyr.com',
-        audience: userId.toString()
+        issuer: 'dastgyr.com'
       }
       JWT.sign(payload, secret, options, (err, token) => {
         if (err) {
@@ -35,10 +37,13 @@ module.exports = {
         }
       }
       // add a check to ensure the payload contains the expected values
-      if (!payload.aud || !payload.iss) {
+      if (!payload.aud || !payload.iss || !payload.userRole) {
         return next(createError.Unauthorized())
       }
-      req.payload = payload
+      req.user = {
+        id: payload.aud,
+        role: payload.userRole
+      }
       next()
     })
   },
