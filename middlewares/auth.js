@@ -2,7 +2,8 @@ const { verifyAccessToken } = require('../helpers/jwtHelper')
 
 const authMiddleware = async (req, res, next) => {
   try {
-    await verifyAccessToken(req, res, next)
+    const payload = await verifyAccessToken(req, res, next)
+    req.user = payload // Set the user object with the payload
     next()
   } catch (error) {
     next(error)
