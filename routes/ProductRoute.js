@@ -48,9 +48,15 @@ router.get('/', verifyAccessToken, async (req, res, next) => {
 })
 
 // Get a single product
-router.get('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
+router.get('/:id', verifyAccessToken, async (req, res, next) => {
   try {
-    res.json(req.product)
+    console.log('req.params', req.params)
+    const product = await Product.findById(req.params.id)
+    console.log(product)
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' })
+    }
+    res.json(product)
   } catch (err) {
     next(err)
   }
@@ -102,6 +108,21 @@ router.delete('/:id', verifyAccessToken, getProduct, async (req, res, next) => {
 
     await req.product.remove()
     res.json({ message: 'Product deleted' })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// Get a single product
+router.get('slug/:id', verifyAccessToken, async (req, res, next) => {
+  try {
+    console.log('req.params', req)
+    const product = await Product.findById(req.params.id)
+    console.log(product)
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' })
+    }
+    res.json(product)
   } catch (err) {
     next(err)
   }

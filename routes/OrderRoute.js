@@ -4,6 +4,7 @@ const { verifyAccessToken } = require('../helpers/jwtHelper')
 const Order = require('../models/order')
 const getProduct = require('../middlewares/product/getProduct')
 const getOrder = require('../middlewares/order/getOrder')
+const Product = require('../models/product')
 
 /**
  * Place an order
@@ -19,6 +20,10 @@ router.post('/', verifyAccessToken, getProduct, async (req, res, next) => {
       selectedOptions: req.body.order.selectedOptions,
       totalPrice: req.body.order.totalPrice
     })
+
+    // Reduce the product quantity
+    const { productId, selectedOptions, productQuantity } = req.body.order
+    await reduceProductQuantity(productId, selectedOptions, productQuantity)
 
     await order.save()
     res.status(201).json(order)
@@ -115,5 +120,30 @@ router.delete('/:id', verifyAccessToken, getOrder, async (req, res, next) => {
     next(err)
   }
 })
+
+async function reduceProductQuantity(productId, selectedOption, quantity) {
+  const product = await Product.findById(productId)
+
+  // console.log('product', product)
+  console.log('selectedOption', selectedOption)
+  console.log('product.variations', product.variations)
+
+  // Find the variation option with the selected option
+  const variationOption = product.variations.find(
+    (option) => option.option === selectedOption
+  )
+
+  // // Check if the variation option exists and has sufficient quantity
+  // if (!variationOption || variationOption.quantity < quantity) {
+  //   throw new Error('Insufficient quantity for the selected option')
+  // }
+
+  // console.log('variationOption', variationOption)
+  // Reduce the quantity of the selected option
+  variationOption.quantity -= quantity
+
+  // Save the updated product
+  await product.save()
+}
 
 module.exports = router
