@@ -3,7 +3,6 @@ const Product = require('../../models/product')
 async function getProduct(req, res, next) {
   try {
     const product = await Product.findById(req.body.order.productId)
-    console.log(product)
     if (!product) {
       return res.status(404).json({ message: 'Product not found' })
     }

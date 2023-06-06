@@ -12,8 +12,8 @@ router.post('/', verifyAccessToken, getProduct, async (req, res, next) => {
   try {
     const order = new Order({
       retailerId: req.user.id,
-      supplierId: req.product.supplierId,
-      productId: req.product._id,
+      supplierId: req.product.supplier,
+      productId: req.body.order.productId,
       productPrice: req.body.order.productPrice,
       productQuantity: req.body.order.productQuantity,
       selectedOptions: req.body.order.selectedOptions,
