@@ -34,7 +34,7 @@ router.get('/', verifyAccessToken, async (req, res, next) => {
     switch (role) {
       case UserRole.SUPPLIER: {
         const supplierOrders = await Order.find({
-          'products.supplierId': userId
+          supplierId: userId
         })
 
         res.json(supplierOrders)
@@ -63,8 +63,8 @@ router.get('/:id', verifyAccessToken, getOrder, (req, res) => {
 /**
  * Update order status
  */
-router.put('/:id/status', async (req, res, next) => {
-  const { orderId } = req.params
+router.put('/updatestatus', async (req, res, next) => {
+  const { orderId } = req.body
   const { status } = req.body
 
   try {
@@ -79,7 +79,7 @@ router.put('/:id/status', async (req, res, next) => {
     order.status = status
     await order.save()
 
-    res.json({ message: 'Order status updated to: ', status })
+    res.json({ message: 'Order status updated' })
   } catch (error) {
     next(error)
   }
