@@ -2,14 +2,16 @@ const JWT = require('jsonwebtoken')
 const createError = require('http-errors')
 
 module.exports = {
-  signAccessToken: (userId) => {
+  signAccessToken: (userId, userRole) => {
     return new Promise((resolve, reject) => {
-      const payload = {}
+      const payload = {
+        aud: userId.toString(),
+        userRole: userRole
+      }
       const secret = process.env.ACCESS_TOKEN_SECRET
       const options = {
-        expiresIn: '60m',
-        issuer: 'dastgyr.com',
-        audience: userId.toString()
+        expiresIn: '1w',
+        issuer: 'dastgyr.com'
       }
       JWT.sign(payload, secret, options, (err, token) => {
         if (err) {
@@ -25,7 +27,7 @@ module.exports = {
     if (!req.headers['authorization']) return next(createError.Unauthorized())
     const authHeader = req.headers['authorization']
     const bearerToken = authHeader.split(' ')
-    const token = bearerToken[1]
+    const token = bearerToken[1].toString()
     JWT.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, payload) => {
       if (err) {
         if (err.name === 'JsonWebTokenError') {
@@ -35,10 +37,13 @@ module.exports = {
         }
       }
       // add a check to ensure the payload contains the expected values
-      if (!payload.aud || !payload.iss) {
+      if (!payload.aud || !payload.iss || !payload.userRole) {
         return next(createError.Unauthorized())
       }
-      req.payload = payload
+      req.user = {
+        id: payload.aud,
+        role: payload.userRole
+      }
       next()
     })
   },
@@ -48,7 +53,7 @@ module.exports = {
       const payload = {}
       const secret = process.env.REFRESH_TOKEN_SECRET
       const options = {
-        expiresIn: '24h',
+        expiresIn: '2w',
         issuer: 'dastgyr.com',
         audience: userId.toString()
       }

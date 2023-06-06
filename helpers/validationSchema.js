@@ -7,7 +7,8 @@ const authSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   // password: Joi.string().pattern(passwordRegex).required(),
   password: Joi.string().min(8).required(),
-  role: Joi.string().required().valid('supplier', 'retailer')
+  role: Joi.string().required().valid('supplier', 'retailer'),
+  contact_number: Joi.string().required()
 })
 
 const loginSchema = Joi.object({

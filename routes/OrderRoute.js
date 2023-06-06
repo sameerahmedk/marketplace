@@ -2,13 +2,24 @@ const express = require('express')
 const router = express.Router()
 const { verifyAccessToken } = require('../helpers/jwtHelper')
 const Order = require('../models/order')
+const getProduct = require('../middlewares/product/getProduct')
+const getOrder = require('../middlewares/order/getOrder')
 
 /**
  * Place an order
  */
-router.post('/', verifyAccessToken, async (req, res, next) => {
+router.post('/', verifyAccessToken, getProduct, async (req, res, next) => {
   try {
-    const order = new Order(req.body)
+    const order = new Order({
+      retailerId: req.user.id,
+      supplierId: req.product.supplier,
+      productId: req.body.order.productId,
+      productPrice: req.body.order.productPrice,
+      productQuantity: req.body.order.productQuantity,
+      selectedOptions: req.body.order.selectedOptions,
+      totalPrice: req.body.order.totalPrice
+    })
+
     await order.save()
     res.status(201).json(order)
   } catch (err) {
@@ -26,16 +37,16 @@ const UserRole = {
 
 router.get('/', verifyAccessToken, async (req, res, next) => {
   try {
-    const { role, _id } = req.user
+    const { role, userId } = req.user
 
     switch (role) {
       case UserRole.SUPPLIER: {
-        const supplierOrders = await Order.find({ supplier_id: _id })
+        const supplierOrders = await Order.find({ supplierId: userId })
         res.json(supplierOrders)
         break
       }
       case UserRole.RETAILER: {
-        const retailerOrders = await Order.find({ retailer_id: _id })
+        const retailerOrders = await Order.find({ retailerId: userId })
         res.json(retailerOrders)
         break
       }
@@ -55,6 +66,26 @@ router.get('/:id', verifyAccessToken, getOrder, (req, res) => {
 })
 
 /**
+ * Update order status
+ */
+router.put('/:id/status', async (req, res, next) => {
+  const { id } = req.params
+  const { status } = req.body
+
+  try {
+    const order = await Order.findByIdAndUpdate(id, { status }, { new: true })
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' })
+    }
+
+    res.json({ message: 'Order status updated to:', status })
+  } catch (error) {
+    next(error)
+  }
+})
+
+/**
  * Update order
  */
 router.patch('/:id', verifyAccessToken, getOrder, async (req, res, next) => {
@@ -62,35 +93,12 @@ router.patch('/:id', verifyAccessToken, getOrder, async (req, res, next) => {
     if (!req.body) {
       return res.status(400).json({ message: 'No fields provided to update' })
     }
-    if (req.body.orderId != null) {
-      res.order.orderId = req.body.orderId
-    }
-    if (req.body.supplierId != null) {
-      res.order.supplierId = req.body.supplierId
-    }
-    if (req.body.name != null) {
-      res.order.name = req.body.name
-    }
-    if (req.body.description != null) {
-      res.order.description = req.body.description
-    }
-    if (req.body.unit_price != null) {
-      res.order.unit_price = req.body.unit_price
-    }
-    if (req.body.category != null) {
-      res.order.category = req.body.category
-    }
-    if (req.body.brand != null) {
-      res.order.brand = req.body.brand
-    }
-    if (req.body.quantity != null) {
-      res.order.quantity = req.body.quantity
-    }
-    if (req.body.image != null) {
-      res.order.image = req.body.image
-    }
-    const updatedorder = await res.order.save()
-    res.json(updatedorder)
+
+    const { order } = res
+    Object.assign(order, req.body)
+
+    const updatedOrder = await order.save()
+    res.json(updatedOrder)
   } catch (err) {
     next(err)
   }
@@ -107,24 +115,5 @@ router.delete('/:id', verifyAccessToken, getOrder, async (req, res, next) => {
     next(err)
   }
 })
-
-/**
- * Middleware function to get a single order by ID
- */
-async function getOrder(req, res, next) {
-  let order
-  try {
-    order = await Order.findOne({
-      order_id: req.params.id
-    })
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' })
-    }
-  } catch (err) {
-    next(err)
-  }
-  res.order = order
-  next()
-}
 
 module.exports = router

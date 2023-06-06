@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const ProductRoute = require('./routes/ProductRoute')
+const OrderRoute = require('./routes/OrderRoute')
 const bodyParser = require('body-parser')
 const authRouter = require('./routes/auth.routes')
 
@@ -17,6 +18,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/auth', authRouter)
 app.use('/product', ProductRoute)
+app.use('/order', OrderRoute)
 
 const { MONGO_URI, PORT } = process.env
 
